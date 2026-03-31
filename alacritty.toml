@@ -1,0 +1,19 @@
+# Minimal Alacritty Configuration - Borderless
+
+[window]
+opacity = 0.95
+decorations = "None"
+padding = { x = 5, y = 5 }
+dynamic_padding = true
+title = "Alacritty"
+dynamic_title = true
+class = { instance = "Alacritty", general = "Alacritty" }
+dimensions = { columns = 80, lines = 24 }
+position = { x = 0, y = 0 }
+
+[font]
+normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
+size = 11.0
+
+[colors]
+transparent_background_colors = true
