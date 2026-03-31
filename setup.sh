@@ -9,7 +9,23 @@ echo ""
 
 # --- Install packages ---
 echo ">>> Installing packages..."
-sudo apt update && sudo apt install -y zsh tmux neovim alacritty curl git
+sudo apt update && sudo apt install -y zsh tmux neovim alacritty curl git unzip fontconfig
+
+# --- Install JetBrainsMono Nerd Font ---
+echo ">>> Installing JetBrainsMono Nerd Font..."
+FONT_DIR="$HOME/.local/share/fonts/JetBrainsMono"
+if [ ! -d "$FONT_DIR" ]; then
+  NERD_FONT_VERSION="3.3.0"
+  FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v${NERD_FONT_VERSION}/JetBrainsMono.zip"
+  TMP_DIR="$(mktemp -d)"
+  curl -Lo "$TMP_DIR/JetBrainsMono.zip" "$FONT_URL"
+  mkdir -p "$FONT_DIR"
+  unzip -o "$TMP_DIR/JetBrainsMono.zip" -d "$FONT_DIR"
+  rm -rf "$TMP_DIR"
+  fc-cache -fv
+else
+  echo "JetBrainsMono Nerd Font already installed, skipping."
+fi
 
 # --- Install kanata ---
 echo ">>> Installing kanata..."
@@ -50,6 +66,10 @@ cp "$DOTFILES_DIR/alacritty.toml" "$HOME/.config/alacritty/alacritty.toml"
 mkdir -p "$HOME/.config/nvim"
 cp -r "$DOTFILES_DIR/nvim/." "$HOME/.config/nvim/"
 
+# --- Bootstrap LazyVim ---
+echo ">>> Bootstrapping LazyVim (first run will install plugins)..."
+nvim --headless "+Lazy! sync" +qa || true
+
 mkdir -p "$HOME/.config/kanata"
 cp "$DOTFILES_DIR/config.kbd" "$HOME/.config/kanata/config.kbd"
 
@@ -82,7 +102,9 @@ chsh -s "$(which zsh)"
 echo ""
 echo "=== Setup Complete ==="
 echo "  - zsh, tmux, neovim, alacritty installed"
+echo "  - JetBrainsMono Nerd Font installed"
 echo "  - oh-my-zsh + plugins installed"
+echo "  - LazyVim plugins synced"
 echo "  - kanata installed and running as user service"
 echo "  - Config files copied to ~/.config/"
 echo "  - Default shell set to zsh"
