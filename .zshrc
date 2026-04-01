@@ -62,7 +62,7 @@ plugins=(
   git
   zsh-syntax-highlighting
   zsh-autosuggestions
-  #zsh-vi-mode
+  kubectl
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -86,8 +86,7 @@ source $ZSH/oh-my-zsh.sh
 
 # ssh
 # export SSH_KEY_PATH="~/.ssh/rsa_id"
-#adds npm packages globally
-export PATH=$PATH:`npm bin -g`
+
 # Set personal aliases, overriding those provided by oh-my-zsh libs,
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
@@ -96,20 +95,32 @@ export PATH=$PATH:`npm bin -g`
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias swapd='cd ~/.local/state/nvim/swap/'
-alias stg='ssh -p 2222 -i ~/.ssh/id_rsa synq@20.63.19.165'
-alias pipe='ssh -o IdentitiesOnly=yes -i ~/.ssh/id_rsa  synq@192.168.10.188'
-alias prod='az network bastion ssh --name "bastion" --resource-group SYNQTech --target-resource-id /subscriptions/e6b3c7c2-a383-4704-9359-aa0b604340e5/resourceGroups/SYNQTech/providers/Microsoft.Compute/virtualMachines/vm-synq-mystore --auth-type ssh-key --username synq --ssh-key ~/.ssh/id_rsa'
+alias skb="sudo systemctl stop kanata.service"
+alias rkb="sudo systemctl restart kanata.service"
+alias pcoip='docker run -d --rm -h myhost \
+  -v $(pwd)/.config/:/home/tristan/.config/Teradici \
+  -v $(pwd)/.logs:/tmp/Teradici/$USER/PCoIPClient/logs \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -v ${XDG_RUNTIME_DIR}/pulse:/run/pulse:ro \
+  -e PULSE_SERVER=unix:/run/pulse/native \
+  -e DISPLAY=$DISPLAY \
+  --privileged \
+  pcoip-client:pulse'
+export PATH="$PATH:/opt/nvim/"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-fpath+=${ZDOTDIR:-~}/.zsh_functions
-DOCKER_HOST=unix:///run/user/1000/docker.sock
 
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/home/tristan/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/home/tristan/Downloads/google-cloud-sdk/path.zsh.inc'; fi
 
-autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C /usr/bin/terraform terraform
+# The next line enables shell command completion for gcloud.
+if [ -f '/home/tristan/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/home/tristan/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
 
-# add Pulumi to the PATH
-export PATH=$PATH:/home/tristan/.pulumi/bin
-. "/home/tristan/.deno/env"
+# peon-ping quick controls
+alias peon="bash /home/tristan/.claude/hooks/peon-ping/peon.sh"
+[ -f /home/tristan/.claude/hooks/peon-ping/completions.bash ] && source /home/tristan/.claude/hooks/peon-ping/completions.bash
+
+### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
+export PATH="/home/tristan/.rd/bin:$PATH"
+### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)

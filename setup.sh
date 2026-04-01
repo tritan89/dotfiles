@@ -9,12 +9,25 @@ echo ""
 
 # --- Install packages ---
 echo ">>> Installing packages..."
-sudo apt update && sudo apt install -y zsh tmux neovim alacritty curl git unzip fontconfig
+sudo apt update && sudo apt install -y zsh tmux alacritty curl git unzip fontconfig
+
+# --- Install Neovim (latest stable from GitHub) ---
+echo ">>> Installing latest Neovim..."
+NVIM_URL="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
+TMP_DIR="$(mktemp -d)"
+curl -Lo "$TMP_DIR/nvim.tar.gz" "$NVIM_URL"
+sudo rm -rf /opt/nvim
+sudo tar -xzf "$TMP_DIR/nvim.tar.gz" -C /opt/
+sudo mv /opt/nvim-linux-x86_64 /opt/nvim
+rm -rf "$TMP_DIR"
+if ! grep -q '/opt/nvim/bin' <<< "$PATH"; then
+  export PATH="/opt/nvim/bin:$PATH"
+fi
 
 # --- Install JetBrainsMono Nerd Font ---
 echo ">>> Installing JetBrainsMono Nerd Font..."
-FONT_DIR="$HOME/.local/share/fonts/JetBrainsMono"
-if [ ! -d "$FONT_DIR" ]; then
+FONT_DIR="$HOME/.local/share/fonts"
+if ! fc-list | grep -qi "JetBrainsMono Nerd Font"; then
   NERD_FONT_VERSION="3.3.0"
   FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v${NERD_FONT_VERSION}/JetBrainsMono.zip"
   TMP_DIR="$(mktemp -d)"
@@ -67,8 +80,12 @@ mkdir -p "$HOME/.config/nvim"
 cp -r "$DOTFILES_DIR/nvim/." "$HOME/.config/nvim/"
 
 # --- Bootstrap LazyVim ---
-echo ">>> Bootstrapping LazyVim (first run will install plugins)..."
-nvim --headless "+Lazy! sync" +qa || true
+echo ">>> Installing lazy.nvim and LazyVim plugins..."
+LAZY_DIR="$HOME/.local/share/nvim/lazy/lazy.nvim"
+if [ ! -d "$LAZY_DIR" ]; then
+  git clone --filter=blob:none --branch=stable https://github.com/folke/lazy.nvim.git "$LAZY_DIR"
+fi
+nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
 
 mkdir -p "$HOME/.config/kanata"
 cp "$DOTFILES_DIR/config.kbd" "$HOME/.config/kanata/config.kbd"
@@ -94,6 +111,14 @@ EOF
 systemctl --user daemon-reload
 systemctl --user enable --now kanata
 
+# --- Install Claude Code ---
+echo ">>> Installing Claude Code..."
+if ! command -v claude &>/dev/null; then
+  curl -fsSL https://claude.ai/install.sh | sh
+else
+  echo "Claude Code already installed, skipping."
+fi
+
 # --- Set default shell to zsh ---
 echo ">>> Setting default shell to zsh..."
 chsh -s "$(which zsh)"
@@ -105,6 +130,7 @@ echo "  - zsh, tmux, neovim, alacritty installed"
 echo "  - JetBrainsMono Nerd Font installed"
 echo "  - oh-my-zsh + plugins installed"
 echo "  - LazyVim plugins synced"
+echo "  - Claude Code installed"
 echo "  - kanata installed and running as user service"
 echo "  - Config files copied to ~/.config/"
 echo "  - Default shell set to zsh"
